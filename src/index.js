@@ -16,6 +16,8 @@ const refs = {
   gallery: document.querySelector('.gallery'),
   loadMoreBtn: document.querySelector('.load-more'),
 };
+const per_page = 40;
+let page = 1;
 
 refs.loadMoreBtn.style.display = 'none';
 
@@ -57,16 +59,20 @@ async function onSearchBtn(e) {
 }
 async function onBtnLoadMoreClick() {
   const images = await requireImages.getImage();
-
   const renderCard = createImgGallery(images.hits);
-
+  //page += 1;
   totalHits -= images.hits.length;
-  const value = totalHits - images.hits.length;
+  // const totalPage = totalHits / per_page;
 
   addToHTML(renderCard);
-  smoothPageScrolling();
-  toggleLoadMoreBtn(value);
 
+  if (totalHits === 0 || totalHits < 0) {
+    Notify.info("We're sorry, but you've reached the end of search results.");
+    return;
+  }
+  toggleLoadMoreBtn(totalHits);
+
+  smoothPageScrolling();
   gallery.refresh();
 }
 
@@ -77,9 +83,12 @@ function addToHTML(renderCard) {
   refs.gallery.insertAdjacentHTML('beforeend', renderCard);
 }
 function toggleLoadMoreBtn(value) {
-  if (value < 0) {
+  if (value === 0 || value < 0) {
     refs.loadMoreBtn.style.display = 'none';
-    Notify.info("We're sorry, but you've reached the end of search results.");
+    //Notify.info("We're sorry, but you've reached the end of search results.");
+  } else if (value < per_page) {
+    refs.loadMoreBtn.style.display = 'none';
+    //Notify.info("We're sorry, but you've reached the end of search results.");
   } else {
     refs.loadMoreBtn.style.display = 'block';
   }
